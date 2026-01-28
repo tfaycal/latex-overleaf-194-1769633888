@@ -1,0 +1,341 @@
+\documentclass{article}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\begin{document}
+\title{High-fidelity 3D Reconstruction of Solar Coronal Physics with the Updated CROBAR Method}
+\author{Joseph Plowman\thanks{jplowman@boulder.swri.edu} and Daniel B. Seaton and Amir Caspi and J. Marcus Hughes and Matthew J. West}
+\affil{Southwest Research Institute, Boulder, CO 80302, USA}
+\affil{European Space Research and Technology Centre, European Space Agency, 2201 AZ Noordwijk, The Netherlands}
+However, to follow the rules and the IEEE template for authors with identical affiliations, the corrected output is:
+\documentclass{article}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\begin{document}
+\title{High-fidelity 3D Reconstruction of Solar Coronal Physics with the Updated CROBAR Method}
+\author{
+\IEEEauthorblockN{Joseph Plowman\thanks{jplowman@boulder.swri.edu}, Daniel B. Seaton, Amir Caspi, J. Marcus Hughes}
+\IEEEauthorblockA{Southwest Research Institute, Boulder, CO 80302, USA}
+\and
+\IEEEauthorblockN{Matthew J. West}
+\IEEEauthorblockA{European Space Research and Technology Centre, European Space Agency, 2201 AZ Noordwijk, The Netherlands}
+}
+\maketitle
+\begin{abstract}
+We present an extension of the Coronal Reconstruction Onto B-Aligned Regions (CROBAR) method to Linear Force Free Field (LFFF) extrapolations, and apply it to the reconstruction of a set of Atmospheric Imaging Assembly, Michelson Doppler Imager, and STEREO EUVI data.
+\end{abstract}
+\keywords{Solar corona, Active solar corona, Solar coronal loops, Solar magnetic fields, Computational methods, Astronomy data analysis, Solar extreme ultraviolet emission, Solar x-ray emission}
+% ===== MAIN DOCUMENT CONTENT =====
+
+\section{Introduction}
+Geometry (e.g., it must be divergenceless). These constraints, in turn, reduce the number of degrees of freedom that the coronal plasma can have from a fully general 3D cube to something that can be reproduced from a small number of 2D images. Previous papers (J. Plowman 2021, 2023) have laid out the basic details, shown an initial example, and demonstrated that the B-aligned reconstruction is capable of recovering emission properties given a set of field lines that form the “skeleton” that CROBAR fleshes out into a volume-filling emission structure.
+In this paper, we demonstrate CROBAR applied using a linear force-free field (LFFF) extrapolation, which has currents in the volume and an additional degree of freedom in the form of a parameter $\alpha$, which defines the amount of current in the volume to be aligned with and proportional to the magnetic field (J = $\alpha$B), than a potential field extrapolation, which has no currents in the volume. As part of this extrapolation and fitting process, we are able to vary the value of $\alpha$ to produce an improved fit of the reconstruction to the observed emission—both qualitatively and quantitatively via a $\chi^2$ of residuals between CROBAR modeled and observed emission. Crucially, claim made in this enforces J. Plowman (2021) that CROBAR can bridge magnetic models and EUV imaging to distinguish between and refine proposed coronal magnetic field models, allowing the EUV imaging to be a concrete and quantitative participant in the reconstruction of the coronal magnetic field. The LFFF was chosen because it represents the next step up in complexity over the potential including tunable parameters that can be used for field refinement. However, CROBAR’s constraints on the magnetic field can also be applied to other more sophisticated models.
+We also demonstrate how it is straightforward to incorporate multiple perspectives into the reconstruction using both Solar Terrestrial RElations Observatory (STEREO; see M. L. Kaiser et al. 2008) and AIA observations, previously shown with 3D MHD models (J. Plowman 2023), now with real-world improvements in the observations, reconstructions.
+S. Barra (2019) demonstrated a similar, independently developed, way of estimating a 3D emission structure from EUV images and magnetic field extrapolation. Rather than the Barra FitCoPi method uses an using sparse matrices, iteration on ratios of temperatures and densities that appears to converge reasonably well. However, they do not consider refining the magnetic field extrapolation based on the residuals of their emission fits, as we do here.
+Similarly, a number of authors have studied $\alpha$ in active regions, including some with coronal observations as constraints, e.g., A. Malanushenko et al. (2012). However, one of CROBAR’s innovations is that it uses the full volume observations to estimate $\alpha$ in a quantitative, $\chi^2$-driven fashion, rather than qualitatively, manually traced field lines.
+\subsection{Review of CROBAR, Multiple Perspectives, Linear Force-free Fields}
+\subsubsection{Review of CROBAR}
+We begin with a review of CROBAR for locality of reference. This material is also covered in more detail in the previous papers (J. Plowman 2021, 2023). CROBAR stands for “Coronal Reconstruction Onto B-Aligned Regions,” and it works by decomposing a coronal volume (e.g., of an active region) into a set of magnetic field-aligned regions (i.e., coronal loops). The field lines used are obtained by tracing through a magnetic model (e.g., a potential field or tabulated numerical model, as used in previous papers, or the LFFF we will discuss below, though any model could be used in principle) starting from a set of seed points. To choose these seed points, we primarily pick from the photosphere level weighted by flux observed in the corresponding magnetogram; a Hilbert curve is used to ensure representative sampling. A further smaller set of seed points is uniformly distributed throughout the volume. The results shown here used 5000 Hilbert-weighted seed points and 200 uniformly distributed seed points. CROBAR furthermore lays out a 3D grid of volume elements or “voxels” (each is a cube 0.42 Mm per side in this case) to uniformly cover the region of interest, which we describe further in the next paragraph and in the Appendix. Field lines that fall within a voxel intersecting the surface (r = R$_{\odot}$), which contains the footpoint of already-traced field lines, are culled from this set, resulting in 2230 field lines overall. The field line density is almost always highest at the footpoints, so this helps avoid aliasing caused by the field line density exceeding the voxel resolution.
+From this set of field lines, CROBAR then assigns each voxel on the grid to the field line it is closest to (see the Appendix for a description of this process). The set of all voxels closest to a given field line is the B-aligned region for that field line. This association between voxels and field lines, together with each voxel’s predefined 3D spatial location in the grid, allow the voxel’s height and arc length to be computed. From there, a temperature profile can be applied. P. C. H. Martens (2010) provided an analytic family of such profiles for variable heating functions. We use the simplified analytic profile for constant heating given in Equation (38) of that paper.
+
+The length-wise emission profiles then incorporate the temperature response function for the passband in question; an arbitrary temperature response function can also be used if differential emission measures (DEMs; we use the method of J. Plowman \& A. Caspi 2020; see that paper for further details) are computed (e.g., using AIA data) and the desired temperature response function integrated against the DEM. Is a temperature response function Of particular interest proportional to $T^{2}$. For this response function, dependence on the temperature profile drops out, and the emission reduces to a simple pressure profile, albeit with a temperature-dependent scale height. Authors of analytic loop models (e.g., R. Rosner et al. 1978; P. C. H. Martens 2010) often take the scale height to be sufficiently large that the pressure is roughly constant, which is true for sufficiently hot or low-lying regions, but instead we use the somewhat more accurate exponential function of height, with a characteristic scale height $h_{p}$. The expression for the emission of each B-aligned region then reduces to a linear equation with a single coefficient.
+In practice, $h_{p}$ also depends on temperature—e.g., Equation (3.3) of R. Rosner et al. (1978) lists a proportional relationship with $h_{p} \approx T_{0} \times 50$ Mm MK$^{-1}$. However, this scale height is only important for a fraction of the regions being observed: for regions much cooler than the passbands contributing to the observations (or resulting DEMs), the emission will be very low, and the contributions to the observations insignificant. For regions appreciably shorter than their pressure scale height, the exponential function is roughly constant (this is the common assumption alluded to above). It is only for relatively tall and cool regions with appreciable brightness that the exponential pressure function is important.
+We therefore set a constant $h_{p}$ throughout the simulation and manually tune it to optimize the fit. Consistent with the above assertion, we find that the fit is not strongly dependent on the choice of $h_{p}$ (unless it is set extremely low, much less than the scales of the region), settling on a value of 72 Mm. This corresponds to a temperature of 1.44 MK using the R. Rosner et al. (1978) factor listed above. This is rather lower than the peak temperature present in the active region, but the peak temperatures only occur in the active-region core, where heights are rather low. Additionally, because the temperature increases from the base of field lines up to their apex, where maximum temperature occurs, the effective temperature for scale height purposes is less than the peak temperature in a given region. $T_{0}$ in the scale height may be better thought of as the temperature at which the scale height becomes important for a given region.
+A related issue is that there is a relationship in classical loop models between the pressure and the temperature. R. Rosner et al. (1978), for instance, found that (where $P_{0}$ is the base pressure, $L$ is the field line length, and temperature) is a calculable constant. They assumed uniform heating and a constant cross section. P. C. H. Martens (2010) expanded upon this and intermediate work, finding a family of analytic solutions where this scaling relationship depends on the location of the heating and the expansion of the field line. For the $T^{2}$ power-law temperature response, CROBAR is essentially finding the base pressure for each region. Therefore, for regions that are both bright and tall enough for the scale height to be important, large deviations from the R. Rosner et al. (1978) “scaling law” relationship could be interpreted as deviations from non-equilibrium processes or uniform heating. Alternatively, the scaling law might enable a rough temperature estimate based on the inferred pressure, which could in turn enable a check on the scale heights assumed for the region, although an assumption about the heating profile would in turn need to be made.
+We have found that this $T^{2}$ temperature response, with fixed scale height, works surprisingly well, even for response functions that do not appear terribly close to this overall. We speculate that this is could be explained by a selection effect: namely that most temperature response functions for real-world coronal observations do have temperature ranges where they can be reasonably approximated as being proportional to $T^{2}$, and field-aligned regions that fall in those temperature ranges show up most brightly in those channels. This is motivated by noting the presence of density squared alongside the temperature response function in the emission equation, along with the ideal gas law’s inverse relationship between temperature and density. We are not currently prepared to speculate further along these lines in this paper, but it is an interesting avenue for future work.
+We also note that the 284 \AA\ channel synthesized from DEMs (Figure 1) looks very similar to the $T^{2}$ channel, and we found that using $T^{2}$ as the response function resulted in comparable $\chi^{2}$ to using the 284 \AA\ response function. Because both 284 \AA\ and 335 \AA\ appear very similar to the $T^{2}$ response function, and the $\chi^{2}$ is acceptable (of order unity), we use the emission profiles for the $T^{2}$ response function (i.e., constant except for exponential height falloff) for all of the reconstructions shown in this paper. We are developing profiles that are tailored to non-power-law response functions; the results of this will be shown in the aforementioned future work. The results shown here use the asymmetric version of these profiles, mentioned in J. Plowman (2021). This is a straightforward version of the basic scheme that allows the two footpoints of a region to have different brightnesses. It has two coefficients per B-aligned region/loop, but rather than, for example, having two different scale heights, the two emission profiles assigned to the coefficients differ only in that one is multiplied by the normalized arc length, $l$, while the other is multiplied by $1 - l$. This linearly interpolates the profile between the two coefficient values: the $1 - l$ portion of the emission profile fades linearly with increasing $l$, while the $l$ portion increases in proportion, so that if their two coefficients are equal, the result is the same as would be obtained with a single coefficient and profile without the factors of $l$ and $1 - l$.
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\linewidth]{images/figure1.png}
+\caption{The Michelson Doppler Imager (MDI) magnetogram (top-left panel) and AIA-derived data used in the reconstruction. The top-right panel shows the AIA 335 \AA\ data. The bottom-right panel shows the $T^{2}$ synthetic temperature response function, which is ideal for CROBAR. The bottom-left panel is STEREO 284 \AA\ synthesized from AIA DEMs, which will be used in the multi-vantage-point reconstruction in conjunction with actual STEREO data.}
+\label{fig:label}
+\end{figure}
+Note that we use the terms “channel,” “passband,” and occasionally “temperature response” interchangeably to refer to a set of measurements (typically an image) obtained by integrating a solar source region DEM against a particular temperature response function, whether done in the real world by the physics of the observation or by us post facto, using an estimated solar DEM.
+For purposes of the data set used here, the voxel grid has dimensions $n_{x} = 1104$, $n_{y} = 914$, $n_{z} = 570$, ($n_{z}$ is chosen manually to be $\sim 65\%$ of the other bounds of the region; this height captures most of the emission in the region based on the scale heights inferred from the observed temperatures) with the z-axis oriented along the vertical at magnetogram center. Each voxel is 0.42 Mm in each dimension, which is roughly the size of an AIA pixel projected on the surface of the Sun (ignoring its point-spread function). The origin (i = j = k = 0) point of the voxel grid is at $-235.8$, $-228.3$, and $-83.2$ Mm relative to the reference magnetogram center point on the photosphere, which is at $-0^{\circ} 1$, $-450^{\circ} 0$ from disk center, as seen by the Michelson Doppler Imager (MDI, on board the Solar and Heliospheric Observatory; see P. H. Scherrer et al. 1995; V. Domingo et al. 1995, respectively) on the observation date (2010 July 25, at 00:00:26 UT). Figures shown based on the principal axes of the voxel grid are in Mm and labeled “cube x-coordinate” or “x-voxel aligned coordinate.” Otherwise, we use the respective detector’s coordinate system when showing data for or results projected to that detector.
+
+The CROBAR fit is driven directly by a $\chi^2$ of the residuals between the observations and the CROBAR model, defined in for a conventional 2D pixelated imager in the usual way:
+\begin{equation}
+\chi^2 = \sum_{ij} \frac{(d_{ij} - m_{ij})^2}{\sigma_{ij}^2}
+\end{equation}
+where $d_{ij}$ are the data at the $ij$th pixel, $m_{ij}$ are the modeled values at the $ij$th pixel, and $\sigma_{ij}$ are the estimated errors at the $ij$th pixel. The $\sigma$ are a combination of read noise, $\sigma_r$, which is at a constant level, and shot noise, $\sigma_s$, which scales with the square root of the signal level. These two noise components are combined by adding in quadrature. In the $\chi^2$ that is the goodness-of-fit metric for the inversions shown in this paper, we assume a shot noise of 1 DN per photon plus 5\% for other systematic errors, plus a floor of 5 DN. Similar results have been obtained using noise estimates based on \cite{Boerner2012}.
+CROBAR implements the model $m_{ij}$ being fit, or forward transformed from B-aligned regions to pixels (or other data numbers of an optically thin observation), as a large sparse matrix. That modeled as the product of a forward matrix $A_{ij}$ with the vector of coefficient(s) for the emission profile of all of the B-aligned regions:
+\begin{equation}
+m_i = \sum_j A_{ij} \cdot s_j
+\end{equation}
+the intensity $m_i$ is, 
+This is the same as Equation (1) of \cite{Plowman2021}, although that paper uses different labels for the output and 
+\subsection{Linear Force-free Fields}
+The initial paper on CROBAR \cite{Plowman2021} used the ``potential'' magnetic field approximation. This potential approximation assumes that the current everywhere in the coronal volume of interest is negligible. It is the simplest nontrivial approximation for the magnetic field. The only currents are outside the volume or on the boundaries. As a result, the magnetic field is a solution to Laplace's equation, mathematically identical to the electrostatic problem with a distribution of point charges. The solution can be written as an integral over the magnetic charge density $\rho_B$, using the inverse square law as a Green's function for the charge at each point:
+The magnetic charge density, $\rho_B$, requiring that the field match observations (e.g., magnetographs) at the photospheric boundary.
+The LFFF approach is a slightly more complex level of approximation, and assumes that, rather than being zero, the current is both aligned with and proportional to the magnetic field everywhere in the volume of interest, with the same constant of proportionality everywhere (the nonlinear force-free field—nLFFF—is the next level of complexity, and allows the constant of proportionality to change from one field line to the next, though it must still be constant along any given field line). In other words, in addition to Maxwell's equations, the LFFF requires 
+\begin{equation}
+\nabla \times \mathbf{B} = \alpha \mathbf{B}
+\end{equation}
+with $\alpha$ constant everywhere in the LFFF approximation.
+
+with $\alpha$ constant everywhere in the LFFF approximation.
+In Equation (5), the magnetic force (proportional to J $\times$ B) on the current-carrying plasma is guaranteed to be zero, hence the name of the approximation. The constant $\alpha$ has units of inverse length, and is proportional to the amount of distance required for the field to make one revolution around a common axis. It should be noted that force-free-field extrapolations become unstable if the field lines are long enough to exceed one revolution (i.e., L$|\alpha|$ $>$ 1 where L is the length of the field line---see T. Wiegelmann \& T. Sakurai 2021).
+There are a variety of ways to write the solutions to the LFFF equations; see T. Wiegelmann \& T. Sakurai (2021) for examples. One way is in terms of a modified version of the Green's function expansion given above. In this work, we use the version derived by Y. T. Chiu \& H. H. Hilton (1977). We use a Cartesian coordinate system with the z-axis aligned with the radial vector at the center of the field of view of the image used for the reconstruction, and we assume that the magnetic field B0 on the photospheric boundary is aligned with the z-axis (this is the ``nominal'' case described in Y. T. Chiu \& H. H. Hilton (1977); as they point out, there are additional terms that arise when the horizontal components are nonnegligible and Bx $\neq$ Bz). The Green's-function-based LFFF equations in this coordinate system are:
+The two coefficients in Bx and By are:
+Here we have also substituted , and. We explicitly include, rather than assuming a constant source surface, in which case $\Delta$z = z), because placed at the origin (it is necessary for considering a curved source surface as on the real Sun, where the source surface is at, which is not constant. We discuss such a curved source surface next.
+\subsection{Curved Coordinates}
+The solar surface is curved, and we want to capture this curvature in CROBAR's reconstructions. On the scale of a small active region (AR), this curvature is not significant. For a large one, however, it is. Y. T. Chiu \& H. H. Hilton (1977) mentioned that they assumed a planar photosphere boundary; however, it does not appear that the assumption is actually used. We have numerically tested their equations using a boundary that is not at constant z, and found that the resulting field structure still satisfies the LFFF equations and Maxwell's equations. The test was conducted by placing magnetogram fluxes on a spherical rather than flat surface, evaluating the field according to Y. T. Chiu \& H. H. Hilton (1977) and computing the components of Maxwell's equations at a large number points above the surface, and verifying that the equalities were satisfied to within the numerical precision. As best we can tell, the Y. T. Chiu \& H. H. Hilton (1977) equations are valid for a curved lower boundary.
+We have, however continued to assume that the magnetic field at the boundary is pointing in the z direction, as defined by the Cartesian grid (i.e., it is vertical at the center of the field of view). A more accurate approach might be to assume that the field at the photospheric boundary is radial, but this adds considerable complexity to the LFFF equations (off of the ``nominal'' case)---the radial vector picks up x- and y-components farther from the center of the field of view.
+The loss of fidelity that results from this assumption is small, so we leave this improvement to future work.
+\section{Single-perspective Reconstruction with LFFF}
+Here, we show the application of the LFFF equations with CROBAR to a solar active region. Later in this paper (see Section 4), we will show an example multiple-perspective reconstruction as well. To highlight that results from a two-perspective reconstruction, we use the same data in both of these sections, with three separate views of the active region to be reconstructed, one or two of which serve(s) as the basis for the reconstruction and the remaining serving as independent view(s), for validation.
+
+Currently,
+the only viable source of off-Sun-Earth-line observational data for such a reconstruction is the STEREO mission. (Solar Orbiter now enables some options as well, but its EUV passbands are more limited for active-region observations.) We have identified a narrow window of time at the beginning of the AIA mission where both of the STEREO spacecraft were observing an overlapping region of the Sun that was also visible from Earth, and we use an AR from this interval—specifically NOAA AR 11089 on 2010 July 25,—for the demonstrations in this paper. At the time the data set for this paper was acquired, the sunpy.net.Fido python solar data search tool was unable to find HMI data for this observation date. We therefore use MDI data, which were available, instead. When we checked again some time later, after the analysis was finished, the HMI data were found. We compared the two resulting reconstructions and found only a $\sim10\%$ improvement to the $\chi^2$ figures across the board, and no substantial improvement to visual reconstruction quality.
+In J. Plowman (2021), we showed that an ideal passband for CROBAR reconstructions uses a synthetic image made by integrating AIA DEMs against a power law of index 2. We will use this synthetic passband for the initial single-perspective reconstructions (shown first). Figure 1 shows this synthetic “channel,” alongside an AIA 335 Å image and the corresponding MDI magnetogram. We also show an image of the STEREO 284 Å temperature response synthesized from the AIA DEMs, since we will be using that later on in the multi-vantage-point reconstructions with STEREO data.
+Part of the process of LFFF extrapolation is finding the best $\alpha$ parameter for the extrapolation. The choice of $\alpha$ determines how much the field lines wrap around each other, and in what sense (clockwise or counterclockwise), where $\alpha = 0$ is identical to the potential field case. Figure 2 shows a selection of the field-aligned regions used by CROBAR, from Earth’s perspective, with $\alpha$-values ranging from $-10$ to $+10$ turns per Gm (the region is $\sim0.5$ Gm across). The effect of $\alpha$ on the geometry of the field is evident.
+One of the signature features of CROBAR is that its reconstructions produce a 3D model of the emission structure that can be compared directly, pixel by pixel, with the EUV images. Therefore, the $\chi^2$ residual of the reconstruction can be computed in the standard way by subtracting the modeled image from the original and dividing by the errors in the (these errors are dominated by instrumental and photon counting noise). Indeed, it is this $\chi^2$ that drives the reconstruction in the first place, but poorer or better field extrapolations (specifically, choices of $\alpha$) still result in better or worse $\chi^2$ at the end of the reconstruction. This $\chi^2$, therefore, allows us to close the loop between the field
+\begin{equation}
+B_{xy}C_{x}C_{y}dxdy,6x0\leq1\leq2\leq0=B_{xy}C_{y}C_{x}dxdy,7y0\leq1\leq2\leq0=B_{xyz}rrzrrdxdy,\sin\cos.8z0\leq2\leq3\leq0=C_{z}rrzrrzrrxysin\cos\sin\cos1,\text{and}9\leq1\leq2\leq2\leq2=C_{z}rrxyzxycos\cos.10\leq2\leq2\leq2\leq2=+xxyy,,xy==zzz=rxyz2\leq2=+zz0=zRxy2\leq2=
+\end{equation}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\linewidth]{images/figure2.png}
+\caption{Figure caption}
+\label{fig:label}
+\end{figure}
+extrapolation and the optically thin observations. We demonstrate this ability in Figure 3, which shows CROBAR’s reconstructions using the same values of $\alpha$ shown above, along with the $\chi^2$. Figure 4 shows the squared residuals—the squared differences between the reconstruction and the original AIA data, divided by the estimated error, at each pixel—from which each of these $\chi^2$ were computed. It is evident that the $\alpha = 4$ reconstruction works best both in terms of $\chi^2$ and visually.
+The differences between different $\alpha$ values in Figure 4, while still significant, may appear less so than in Figure 2 for several reasons: $\alpha$ will generally not have a significant effect when the field lines are much smaller than $1/\alpha$. Long field lines are more prevalent in Figure 2 than in Figure 4 (emission tends to be along lower-lying field lines), so the former will show more substantial differences. Lastly, the inversion algorithm attempts to match the observed emission as well as possible within the constraints of each field model, and the nature of the problem gives it some flexibility to do so—emphasizing some field lines and deemphasizing others in order to make for a closer match.
+The value of $\alpha$ that produces the best $\chi^2$ can be further refined, either algorithmically (with a Newton-Raphson method, for instance) or by hand, to find the best $\chi^2$ overall. Here, we have performed the search by hand, and found that the best-fit value is roughly $3.5$; Figure 5 shows the corresponding reconstruction alongside the AIA synthetic passband-based image once again.
+To put this in context, the previously mentioned length limit on $L_\alpha$, conversely sets a maximum value of $\alpha$— —before instability is reached, which depending on the dimensions of the region (T. Wiegelmann \& T. Sakurai 2021). This region has dimensions of roughly $0.4$ Gm, with a corresponding of roughly $15$ Gm$^{-1}$. An $\alpha$ of $3.5$ Gm$^{-1}$ is consistent with this range of $\alpha$, especially considering the active region in question, AR 11089, was quiescent for the period in question.
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\linewidth]{images/figure2.png}
+\caption{Projection through the voxel volume showing a subset of the B-aligned regions used by CROBAR, with varying values for the $\alpha$ parameter of the linear force-free field (LFFF). Values start at $-10$ turns per Gm (top-left panel) and increase left to right, top to bottom, to $+10$ turns per Gm (bottom-right panel). $\alpha = 0$ is the potential field. The coordinate system is directly overhead of the center of the images, with x- and y-axes aligned with longitude and latitude (the data’s “local” coordinate frame).}
+\label{fig:2}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\linewidth]{images/figure3.png}
+\caption{Reconstructions using CROBAR with varying values for the $\alpha$ parameter of the LFFF. Values start at $-10$ turns per Gm (top-left panel) and increase left to right, top to bottom, to $+10$ turns per Gm (bottom-right panel). $\alpha = 0$ is the potential field. The best-fit $\alpha$ is roughly $3.5$ turns per Gm (see Figure 5).}
+\label{fig:3}
+\end{figure}
+
+Figure 3 shows reconstructions using CROBAR with varying values for the $\alpha$ parameter of the LFFF. Values start at $-10$ turns per Gm (top-left panel) and increase left to right, top to bottom, to $+10$ turns per Gm (bottom-right panel). $\alpha = 0$ is the potential field. The best-fit $\alpha$ is roughly $3.5$ turns per Gm (see Figure 5).
+Smaller and less-quiescent active regions, on the other hand, have been estimated to have significantly higher values of $\alpha$---see, for example, S. R\'{e}gnier \& E. R. Priest (2007). The ``linear'' assumption in the LFFF is that the same constant of proportionality applies across the entire extrapolation region, but in reality, the Sun has no obligation to follow this assumption. As a result, the $\alpha$ that best fits the data can vary from one part of the image to the next. We can capitalize on this by producing an image of which $\alpha$ produces the lowest $\chi^2$ at each pixel. The result is a map of which $\alpha$ best fits the data across the entire image, providing a straightforward way to identify regions of high $\alpha$ and, therefore, high amounts of free magnetic energy (in future work, we will incorporate nonlinear force-free field, or nLFFF, extrapolations into CROBAR, which are the fully self-consistent realization of spatially varying $\alpha$). However, there is a significant amount of noise in this result, both due to measurement error from the AIA observations and due to subsections of loops happening to be a better fit at particular places rather than an entire field region being a better fit. To counteract this, we have smoothed the residuals, and used that as the basis of a spatially varying $\alpha$ map---in effect, showing which $\alpha$ best fits the observations over the smoothing region. This is shown in Figure 6, using a Gaussian smoothing kernel of $\sigma = 10$ AIA pixels.
+Although Figure 6 is far from the last word on $\alpha$ (or its distribution) in the corona, and it also is not a substitute for a true nLFFF, it demonstrates how CROBAR serves as a bridge between EUV images and magnetic models. It allows us to take a half-step between the LFFF and nLFFF, visualizing and understanding the results with varying $\alpha$. Figure 4 shows information for each individual $\alpha$ in separate plots, while this figure assimilates the information into a single plot, allowing us to better understand how it fits together spatially in the context of the active region.
+Uncertainties also play a role in determining which $\alpha$ is identified for each region---some regions that show one $\alpha$ may be almost as well fit by another one, with the difference not being statistically significant. This can be discerned per pixel from the residuals in Figure 4 (the relative differences in residuals between different $\alpha$ at the point in question are comparatively modest); more than that is beyond the scope of this introductory work. In future work, we will give detailed consideration to the statistical significance of deviations from potentiality (or from the overall best-fit $\alpha$). 
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\linewidth]{images/figure3.png}
+\caption{Figure 4. Squared residuals of the CROBAR fit to the active region, using the T2 power-law passband from AIA data, and each of the $\alpha$ values shown in Figure 2.}
+\label{fig:label}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\linewidth]{images/figure4.png}
+\caption{Figure 5. Visual comparison between AIA and CROBAR reconstruction for this region. Original AIA DEM based T2 power-law image on the left, CROBAR reconstruction of same image with approximate best-fit value of $\alpha$, 3.5 is on the right.}
+\label{fig:label}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\linewidth]{images/figure5.png}
+\caption{Figure 6.}
+\label{fig:label}
+\end{figure}
+
+Furthermore, the reconstruction of the power-law index $2$ synthetic channel is essentially a reconstruction of the square of the pressure: with that temperature response, each volume element contributes an intensity scaling with 
+\begin{table}[htbp]
+\centering
+\caption{Error-scaled Residual}
+\label{tab:error-scaled-residual}
+\begin{tabular}{llll}
+AIA Helioprojective Latitude (Solar-Y) & -10.0 & -6.0 & -4.0 \\
+200 & 100 & 100 & 100 \\
+100 & 100 & 100 & 100 \\
+10 & 20 & 60 & 55 \\
+5 & 50 & 45 & 40 \\
+\hline
+AIA Helioprojective Latitude (Solar-Y) & -2.0 & 0.0 & 2.0 \\
+200 & 100 & 100 & 100 \\
+100 & 100 & 100 & 100 \\
+10 & 20 & 60 & 55 \\
+5 & 50 & 45 & 40 \\
+\hline
+AIA Helioprojective Longitude (Solar-X) & 600 & 550 & 500 \\
+AIA Helioprojective Latitude (Solar-Y) & 4.0 & 6.0 & 10.0 \\
+200 & 100 & 100 & 100 \\
+100 & 100 & 100 & 100 \\
+10 & 20 & 60 & 55 \\
+5 & 50 & 45 & 40 \\
+\hline
+\end{tabular}
+\end{table}
+to the line-of-sight integral ($l$ in the above equation is the line-of-sight coordinate pertaining to the observation, and we have used the ideal gas law ($P \propto nT$) to convert temperature into the ratio of pressure and density). This integral forms the synthetic channel image. Therefore, we can estimate the plasma $\beta$—that is, the ratio of gas dynamic pressure to magnetic pressure—for the region via a straightforward ratio of this reconstruction and the magnetic pressure we compute from the field extrapolation. $\beta$ is a critical tracer of locations where magnetic energy release can initiate (via ideal MHD instabilities or reconnection), since it measures the relative importance of the magnetic field and gas dynamic physics in determining the behavior of the plasma. In much of the corona, $\beta$ is low ($\ll 1$), and therefore, the magnetic field drives the processes. Where $\beta$ is near unity, on the other hand, gas dynamic behaviors can drive the processes. In particular, the gas dynamic pressure can drive flows that can initiate magnetic reconnection, through which stored magnetic energy can be released in the plasma. CROBAR allows us to visualize plasma $\beta$ in three dimensions, as shown in Figure 7 along with the plasma pressure \cite{Bourdin2017}. 
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\linewidth]{images/figure6.png}
+\caption{Regions of (relatively) high plasma $\beta$ (in purple) shown plotted over the volume-integrated plasma pressure (in green).}
+\label{fig:plasma-beta}
+\end{figure}
+Generally, the plasma $\beta$ in this reconstructed region is low, with the exception of the smaller region to the right of the image. This appears to have a pair of magnetic nulls (locations with zero magnetic field) above and below it connected by a separator (or quasi-separatrix layer) and to be associated with a pseudo-streamer when viewed from the roughly polar perspective. For this region, emission from this perspective is not accessible to any current instrumentation, but easily accessible with CROBAR. It is not obvious that the region would have this structure based on visual inspection of the original AIA data, but becomes clear thanks to CROBAR's ability to combine the magnetic and optically thin information into a true 3D picture that also captures the underlying physics of the coronal plasma. High-$\beta$ regions must (assuming absence of true vacuum) exist around magnetic null points, but other topological elements such as pseudo-streamers or quasi-separatrix layers have no direct mathematical relation to $\beta$. CROBAR allows us to explore $\beta$ in regions without such a direct connection, such as where the field is relatively weak but not necessarily a null.
+Finally, we can also map the free magnetic energy in the region, which is the difference between the magnetic energy in the force-free field(s) and in the potential field. The potential field is the minimum energy state in the corona given the observed photospheric field configuration. Therefore, the difference in magnetic energy ($B^2/(8\pi)$ in CGS or $B^2/(2\mu_0)$ in MKS) between the nonpotential field and the potential configuration is the energy free to do work on the field's environs—under the assumption that the photospheric field configuration remains fixed. 
+\begin{equation}
+E = \frac{B^2}{8\pi}
+\label{eq:magnetic-energy}
+\end{equation}
+We show this free magnetic energy in Figures 8 and 9, first from the AIA perspective with the single, per-pixel, and per-pixel smoothed best-fit $\alpha$ shown in Figure 6 (Figure 8) and then with the multiple views (along the three principal axes of the reconstruction cube) of the single overall best-fit $\alpha$ in Figure 9. 
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\linewidth]{images/figure7.png}
+\caption{Free magnetic energy from the AIA perspective.}
+\label{fig:free-magnetic-energy-aia}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\linewidth]{images/figure8.png}
+\caption{Free magnetic energy with multiple views.}
+\label{fig:free-magnetic-energy-views}
+\end{figure}
+In this second figure, the free energy is shown along with the plasma (gas dynamic pressure) energy for reference: it is clear from the figure that the magnetic energy reservoir is much larger than the plasma energy, and that the magnetic energy tends to be concentrated near the footpoints while the plasma energy is distributed more evenly along the field lines. It is important to note that the free magnetic energy is a nonlocal phenomenon, so locally, the nonpotential energy can be lower than the potential (i.e., locally, the free magnetic energy can be negative); the global free magnetic energy in all is true that an excess of nonpotential $B^2$ compared to potential $B^2$ at a single pixel does not represent a reservoir of energy in that pixel, if a field rearrangement process allows the field to relax to a more potential state, magnetic energy in the red areas of the figure will drop, while energy in the blue areas of Figure 8 will rise.
+There will then be an excess in the red over blue, which will be deposited into other forms of energy (e.g., kinetic). Figure 8 provides a useful overall picture of the presence and availability of magnetic energy across the active region.
+We found that the free magnetic energy for the overall best-fit $\alpha$ ($3.5$ Gm$^{-1}$) was $9 \times 10^{31}$ erg, while it was $1.7 \times 10^{32}$ erg if we took the best $\alpha$ pixel by pixel, and $1.1 \times 10^{32}$ erg in the Gaussian-smoothed case. The plasma (gas dynamic pressure) energy, on the other hand, was found to be $2.8 \times 10^{30}$ erg. The free magnetic energy reservoir is, therefore, larger by a factor of $\sim 30$ than the plasma energy. In the energy values in this figure, we use units of Exajoules (EJ), as they provide the closest order of magnitude to represent these energies. One EJ is $10^{25}$ erg, the energy of a large nanoflare or a small microflare.
+
+CROBAR therefore provides a new way to diagnose where and how energy is stored in the corona, and to investigate changes over time. It offers a brand new visualization of how plasma structure and energization are correlated with each other, allowing them to be placed within the coronal volume in three dimensions, in context with one another.
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\linewidth]{images/figure8.png}
+\caption{Free magnetic energy in the CROBAR reconstructions, as seen from AIA's perspective. In this paper, a surplus (local) free magnetic energy is shown in red, while a deficit is shown in blue. (a) Using the overall best-fit $\alpha$. (b) Using the per-pixel best $\alpha$. (c) Using the best $\alpha$ over 10 pixel-radius Gaussian-smoothed regions. (d) The gas dynamic pressure/energy density is shown for reference.}
+\label{fig:8}
+\end{figure}
+Naturally, the $\alpha$ maps in Figure \ref{fig:8}, being derived from the $\alpha$ map in Figure 6, do not represent an entire self-consistent field model (except for the top-left panel, which is just the best-fitting LFFF), but this is not required in order to produce a map of energy differences composited across the $\alpha$. Figure \ref{fig:8} builds on Figure 6 by showing where the differences between the $\alpha$ actually matter for the physics of the scene.
+We must also point out that the actual source of free magnetic energy is electric currents, which an LFFF only reproduces in a field-proportional average way. In general, these are spatially localized, and may not be localized in the narrowly prescribed ways that LFFFs are capable of describing (i.e., they are exactly proportional to the field with the same constant of proportionality everywhere; see M. S. Wheatland 1999). When local dissipation or rearrangement of those currents modifies the global field to reduce the total energy, they may not make a local region more potential; especially in more complex topologies, it is possible for some regions to become less potential, even while, globally, the total energy is reduced.
+An additional note on how the composite plots ((b) and (c) in Figure \ref{fig:8} and all except bottom-left panel in Figure 6) are constructed: they are based on the images of the residuals in Figure 4. For the per-pixel $\alpha$ and energetics figures, each composite map is made by setting the value at each pixel to that of whichever LFFF solution had the lowest residual at that pixel. For the smoothed figures, the residuals are all smoothed with a Gaussian, as described in the text. These smoothed residuals therefore represent the $\chi^2$ of the solution over the Gaussian neighborhood of the pixel, so the smoothed $\alpha$ map represents the best-fit solutions over each such neighborhood. These maps can only be made for a line of sight for which a corresponding observation is available. Figure 9 therefore uses the overall best-fit $\alpha$.
+\section{Multiple Perspectives}
+We now turn our attention to the question of multiple perspectives. With the matrix form used by CROBAR, it is straightforward to incorporate multiple simultaneous perspectives in the solution, as we discuss below. But first we will touch on the data products available for demonstrating this capability.
+\subsection{Overview of SDO and STEREO}
+Until recently, the only source of observations of optically thin plasma from off of the Earth--Sun line has been the twin-spacecraft STEREO mission. Although Solar Orbiter data are now available as well, the higher-temperature STEREO passbands are more similar to the power-law-index 2 temperature response functions that are ideal for CROBAR. Observed emission in the Extreme Ultraviolet Imager (EUVI) 284 \AA~ passband in particular is quite similar to AIA 335 \AA~ and to the power-law 2 function, as
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\linewidth]{images/figure9.png}
+\caption{Free magnetic energy in the CROBAR reconstructions, viewed along the three principal axes of the reconstruction cube. All are using the overall best for value of $\alpha$, 3.5 Gm$^{-1}$. (a) overhead/height projection. (b) Same perspective with plasma pressure only, for reference. (c) y-axis (latitude) projection. (d) x-axis (longitude) projection. A surplus in the (local) free magnetic energy is shown in the red channel, while a deficit is shown in the blue channel. The plasma pressure is shown in the green channel. In this color scheme, a region with a large amount of excess magnetic energy but low plasma energization will appear red, a large energy deficit and low plasma energization will appear blue, a large excess magnetic energy and high plasma energization will appear yellow, and a large energy deficit with high plasma energization will appear cyan.}
+\label{fig:9}
+\end{figure}
+The angles of the STEREO spacecraft were increasingly far from those of AIA for much of AIA's observing period (beginning in 2010), and STEREO B was lost in 2014. The best time for simultaneous observations was therefore at the very beginning of the AIA mission in 2010. We have identified the active region, already shown, which was observed on 2010 July 25, when the two STEREO spacecraft were about $\pm70^{\circ}$ from the Earth-Sun line, as the best period for a multiple vantage point test. The presence of both spacecraft allows for an independent verification of a two-vantage-point reconstruction: EUVI-A \& AIA can be validated with EUVI-B, and EUVI-B \& AIA can be validated with EUVI-A.
+STEREO does not have enough EUV channels to perform a reliable DEM reconstruction from its data alone, so we cannot re-use the T2 synthetic passband previously shown. Instead, we use the EUVI 284 \AA~ passband. Because the 284 \AA~ passband of STEREO is not identical to the 335 \AA~ AIA one, however, we do use the DEMs from AIA to synthesize a pseudo-AIA 284 \AA~ passband. All three perspectives of 284 \AA~, including the AIA one synthesized from DEMs, are shown in the figures next to the respective reconstruction results: Figure 10 for STEREO A, Figure 11 for STEREO B, and Figure 12 for AIA. We found that a reconstruction simply using AIA 335 \AA~ directly was not quite as good, due to the passband mismatch with EUVI, even though the AIA 335 \AA~ passband is otherwise a slightly better match for the observed emission in the T2 power-law temperature response (see Figure 1).
+\subsection{How Perspectives Are Combined}
+Once the forward matrix mapping from the coefficients of the B-aligned regions to the individual pixels is set up, it is a straightforward matter of applying the linear least-squares (with nonlinear mapping for positivity) formalism to obtain the best-fit solution. This is a standard matrix inversion exercise, and all of the physical coordinate system and coordinate transform aspects of the problem have been encapsulated in the forward matrix. This holds for any other perspective as well.
+From this point, extending CROBAR to use observations from multiple perspectives is straightforward, but for clarity, it merits description in some detail. Equation (2) shows the forward model equation set for a single-perspective observation. If there are instead two observations ``a'' and ``b'' of the same source represented by $c_j$ but made from multiple perspectives, then there are simply two such sets of equations:
+\begin{equation}
+m_{A_{c}}^{1}i_{a_j}i_{a_j}()=m_{A_{c}}^{1}3i_{b_j}i_{b_j}()=
+\end{equation}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\linewidth]{images/figure10.png}
+\caption{Demonstration and visual comparison of reconstruction of (STEREO) EUVI-A using AIA and EUVI-B. The left panel (a) shows reconstruction using AIA (284 \AA~ passband images synthesized using DEMs) alone. The center panel (b) shows the actual STEREO A data. The right panel (c) shows reconstruction using AIA and EUVI-B together. A significant goodness-of-fit improvement is seen when two perspectives are used instead of one, with typical error levels going from $\sim33\%$ to $\sim25\%$.}
+\label{fig:10}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\linewidth]{images/figure11.png}
+\caption{Demonstration and visual comparison of reconstruction of (STEREO) EUVI-B using AIA and STEREO A. The left panel (a) shows reconstruction using AIA (284 \AA~ passband images synthesized using DEMs) alone. The center panel (b) shows the actual EUVI-B data. The right panel (c) shows reconstruction using AIA and EUVI-A together. A significant goodness-of-fit improvement is seen when two perspectives are used instead of one, with typical error levels going from $\sim33\%$ to $\sim25\%$.}
+\label{fig:11}
+\end{figure}
+To solve them both simultaneously, the A matrices and data vectors can be simply stacked into a single matrix and vector as shown by Equation (14).
+\begin{equation}
+\label{eq:14}
+\end{equation}
+\subsubsection{Passband Question}
+
+For these multi-instrument comparisons, we are limited by the available observations to passbands that don’t exactly match the power-law temperature response functions (e.g., $\sim T^2$), described by J. Plowman (2021), for which the real emission best matches the linear coefficient model used by CROBAR. However, Figure 1 has shown that EUVI 284 \AA\ and AIA 335 \AA\ are nevertheless visually quite similar to this power law. Moreover, it mathematically suffices for the emitting regions to have comparable profiles of emission versus arc length, which appears to be the case for these passbands. We therefore believe that these passbands suffice for using CROBAR at this level of development. At a later stage, it should be possible to refine the emission profiles of the B-aligned regions independently, resolving this shortcoming.
+\subsection{Validation}
+The time interval we have chosen is specifically to allow for validation of CROBAR using real data: the reconstruction with AIA alone can be checked against STEREO A and STEREO B, the reconstruction with AIA+STEREO B can be checked against STEREO A, and the reconstruction with AIA+STEREO A can be checked against STEREO B. In each case, the reconstruction allows all vantage points to be synthesized, and therefore, a $\chi^2$ can be computed directly.
+For these figures, we have used the best $\alpha$ (3.5 Gm$^{-1}$) inferred from the AIA reconstructions alone, and used that as the field structure for the multi-perspective reconstructions here. However, we can also optimize $\alpha$ using the residuals of any combination of the perspectives without much additional effort, and intend to do so in future work.
+For the $\chi^2$ that is the goodness-of-fit metric for the inversion, we assume a shot noise of 1 DN per photon plus 5\% for other systematic errors, plus a floor of 5 DN. The AIA-derived 284 \AA\ images, based on the temperature response function shown in Figure 13, are divided by an empirically estimated normalization factor of 4.8. This procedure results in roughly the same counts between the instruments. These values are then treated as DN for AIA, and the same error estimation procedure as for EUVI is applied.
+Our estimate of the actual quality of the reconstruction comes from comparing the reconstructions made with one and two vantage points by against observations from the other vantage points (e.g., comparing the AIA+EUVI-A reconstruction with EUVI-B). For this comparison, we want to know a percentage match between reconstruction and data rather than whatever is set by the instrumental counts. We do still want to weight brighter regions higher, however. Therefore, we used the same shot noise plus relative noise estimate, and again computed a $\chi^2$, but experimented with the shot noise and relative levels (equally partitioned) until we obtained an effective reduced $\chi^2$ of the order of 1. We found that this happened when the shot noise and relative errors for the median intensity in the active region (roughly 2500 DN) combined to 25\% (i.e., shot and relative levels both). In that case, the AIA-only $\chi^2$ was 1.42 for the reconstruction of EUVI-A and 0.98 for the reconstruction of EUVI-B. The reconstruction of EUVI-A from AIA and EUVI-B was 1.02 while the reconstruction of EUVI-B from AIA and EUVI-A was 0.88. All of these reconstructions of the STEREO data had an effective reduced $\chi^2$ of 1 or better when this error level was relaxed to 33\%. Therefore, the two-perspective reconstructions were both within 25\% in the active-region core, as was the AIA-only reconstruction of EUVI-B, and all are within 33\%. The $\chi^2$ is better in the case of computing EUVI-B from AIA and EUVI-A rather than for EUVI-A from the other two perspectives, most likely because EUVI-B’s perspective is closer to AIA’s, whereas the EUVI-A is farther from the other two, being nearly at quadrature. This suggests that the quadrature (90$^\circ$) perspectives are slightly better for the reconstructions than nonquadrature. The improved localization afforded by the second perspective is particularly striking in this case. We also find that the reconstructed STEREO images are cuspier (possessing sharp features at low heights in the corona) than the actual images, while the reconstructed AIA image is less cuspy than the actual. This suggests that the synthesized 284 \AA\ passband from AIA has a larger contribution from low-lying cool emission than the STEREO images. Optical depth may play a role here, and/or the EUVI 284 \AA\ instruments may be less sensitive to low-temperature emission than our estimated 284 \AA\ temperature response functions.
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\linewidth]{images/figure9.png}
+\caption{Demonstration and visual comparison of reconstruction of AIA using observations from the two STEREO EUVI spacecraft. The left panel (a) shows the original AIA data (synthesized 284 \AA\ observations made from DEMs), and the right panel (b) shows the reconstruction.}
+\label{fig:label}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\linewidth]{images/figure10.png}
+\caption{Temperature response function used to estimate the EUVI 284 \AA\ emission channel from AIA DEMs. An integration time of 1 s was assumed, and it was found that a relative normalization factor of 1/4.8 multiplied on this synthesized 284 \AA\ emission gave the best correspondence. The EUVI data used a 32 s exposure time, for comparison.}
+\label{fig:label}
+\end{figure}
+
+\section{Conclusions}
+We have demonstrated both the ability of CROBAR to constrain the parameters of the solar magnetic field and that it can incorporate information from arbitrary perspectives, at arbitrary resolutions, into its reconstructions. These magnetic field constraints demonstrate EUV observations being used to quantitatively close the loop on inference of the coronal magnetic field. The matrix-based treatment used in solving the forward problem allows for highly heterogeneous data sources to be incorporated in a completely seamless fashion. CROBAR thus provides an invaluable starting point for true data-driven multi-instrument synthesis of the actual coronal volume. We have further shown how these reconstructions can give direct information on the physical parameters of the corona and the all-important magnetic energetics that drive the plasma. The results also indicate that emission channels such as 284 \AA\ can have utility in their reconstructions, even if they do not match the more ideal power-law response functions.
+In the preceding sections, we touched on a variety of potential future enhancements and studies for CROBAR: the fact that the T2 temperature response function works better than expected, why that may be, and if we can improve on it; refining the boundary conditions so they are not assumed to be along the z-axis; incorporating nLFFF extrapolations; properly incorporating the statistical significance of deviations from potentiality or from an overall best-fit LFFF; and understanding when multiple regions with differing $\alpha$ may overlap along a single line of sight (by using multiple perspectives or tracing back through the forward matrices to understand which regions are driving the goodness of fit in a given pixel). Such extensions of CROBAR provide fertile ground for new research topics in the coming years.
+A 3D understanding of the corona is essential to truly transformative progress in unraveling many of the remaining mysteries in solar physics \cite{Caspi2023a}. CROBAR can provide a key first step to mapping from 2D remote-sensing observables to a physics-based, data-constrained 3D environment. CROBAR or similar data-driven reconstructions offer a new means to explore the 3D corona, and new and necessary approaches to data assimilation for advanced coronal models \cite{Seaton2023}.
+Unified 3D data assimilation and modeling frameworks will be foundational to the next generation of distributed solar observatories \cite{Gopalswamy2023; Raouafi2023} or for coordination across several missions with unique viewpoints \cite{Hassler2023}. Missions that leverage highly complementary multi-perspective observations specifically to probe the deep 3D physics of the corona, such as the COMPLETE concept that combines global magnetography and broadband spectroscopic imaging \cite{Caspi2023b}, will require tools like CROBAR to link their many observables in self-consistent physically meaningful ways.
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\linewidth]{images/figure11.png}
+\caption{The supplementary materials include a 360$^\circ$ rotation of a small example active region observed on 2018 February 3. This static figure accompanies that animation, and shows the original AIA image (top-left panel), the reconstruction from the same perspective as the original AIA observations (top-right panel), and the reconstruction viewed rotated 45$^\circ$ (bottom-left panel) and 90$^\circ$ (bottom-right panel) in the ecliptic plane. The rotation is done by incrementing the heliocentric equatorial longitude of the observer, relative to the AIA observation, while holding the latitude and distance fixed.}
+\label{fig:label}
+\end{figure}
+We have made a preliminary version of CROBAR available \cite{Plowman2024}. It includes an example notebook that performs a single-perspective reconstruction of AIA data using the 211 \AA\ channel for demonstrative purposes. To illustrate the full three-dimensionality of the reconstructions, the supplementary materials of this paper also show a full 3D rotation frames from this produced by CROBAR. 
+\begin{table}[htbp]
+\centering
+\caption{Temperature response used to estimate EUVI 284 \AA\ from AIA DEMs}
+\label{tab:label}
+\begin{tabular}{lll}
+\hline
+Temperature (Kelvin) & Response (x 10$^{25}$ DN cm$^{5}$ s$^{-1}$ pixel$^{-1}$) \\
+\hline
+0.0 & 0.0 \\
+0.25 & 0.5 \\
+0.5 & 0.75 \\
+1.0 & 1.0 \\
+1.25 & 1.5 \\
+\hline
+\end{tabular}
+\end{table}
+
+of
+animation are shown in Figure 14. Both of these use a different region (a small region that was at disk center on 2018 February 3 around 1400 UTC) than the one we have focused on in the rest of the paper, but the capability is the same. The example notebook will produce the sequence of rotation frames when run successfully. We use 211 \AA{} rather than 335 \AA{} in this example because temperatures in this region are generally less than the peak temperature response of 211 \AA{}. Moreover, 211 \AA{} is single-peaked, so it is a good match for the T2 power-law assumed temperature response in this region.
+The analysis in this work was carried out in Python, making use of NumPy (C. R. Harris et al. 2020), SciPy (P. Virtanen et al. 2020), AstroPy (Astropy Collaboration et al. 2013, 2018, 2022), and SunPy (The SunPy Community et al. 2020). This work was supported by NASA grant 80NSSC17K0598, by NASA under GSFC subcontract No. 80GSFC20C0053 to SwRI, and by SwRI Presidential Discretion Internal Research funding under projects 19.R6225 and 19.R6426. We would also like to thank the referees for providing their time and helpful comments on this paper.
+\subsection{Appendix Identification of Voxels with Field-aligned Regions}
+An important part of CROBAR is that every point (down to the voxelization scale $\Delta x$) in the reconstructed space is identified with a field line. The voxels have 3D indices $\{i, j, k\}$ running from 0 to $n_x - 1$, 0 to $n_y - 1$, and 0 to $n_z - 1$, so that the voxels cover a cube ranging from $x_0$ to $x_0 + \Delta x n_x$, $y_0$ to $y_0 + \Delta y n_y$, $z_0$ to $z_0 + \Delta z n_z$ (due to a coding limitation the current implementation sets $\Delta x = \Delta y = \Delta z$).
+On the field line side, each line is given an integer identification number. This is just the order of generation, after removing culled field lines from the set, so that these identification numbers run from 0 to $n_{loop} - 1$, where $n_{loop}$ is the number of loops that remain after culling.
+The identification of the voxels with field lines was implemented with a 3D cube of integers, also of dimensions $n_x \times n_y \times n_z$. The $ijk$th entry of the cube contains the identification number of the field line, which the $ijk$th voxel has been assigned to. The voxels are assigned to the field line they are closest to, calculated as follows.
+The field lines are first divided into straight line segments. For a given voxel and segment, we compute the dot product of the vector from the initial (i.e., shorter in length from the arbitrarily designated ``first'' footpoint of the field line) point of the segment to the voxel with the unit vector pointing along the segment. This gives the point at which the voxel is closest to the infinite line extending through the segment. If that point is within the bounds of the segment, we compute the distance from it to the voxel and use that as the distance to the segment. If it falls outside the segment, we ``clip'' it to extrema of the segment (i.e., we use the distance to the nearer endpoint of the segment instead). For this calculation, the position of a voxel is taken to be the single point at its center.
+As the voxels are checked against the segments of the field lines, the identification number and distance are recorded. If a segment is found to be closer to the voxel, this record is updated with the new field line identification number and distance. In order to avoid checking all segments for all voxels, we first perform a Voronoi Tesselation of the initial points of the line segmentation and, for a given point, only check the voxels within the x--y--z cuboid bounding the point's convex hull in the tesselation.
+From this calculation, we also record in a supplementary cube (also $n_x \times n_y \times n_z$) the ``clipped'' distance along the nearest segment, plus the arc length of the initial point of the segment from the first footpoint of the field line. We use this as the arc length estimate for the voxels. It puts all voxels in a given cross section at roughly the same arc length.
+
+% ===== REFERENCES =====
+
+\begin{thebibliography}{99}
+\bibitem{ref1} Astropy Collaboration, Price-Whelan, A. M., Lim, P. L., et al. 2022, ApJ, 935, 167
+\bibitem{ref2} Astropy Collaboration, Price-Whelan, A. M., Sipőcz, B. M., et al. 2018, AJ, 156, 123
+\bibitem{ref3} Astropy Collaboration, Robitaille, T. P., Tollerud, E. J., et al. 2013, A&A, 558, A33
+\bibitem{ref4} Barra, S. 2019, SoPh, 294, 101
+\bibitem{ref5} Boerner, P., Edwards, C., Lemen, J., et al. 2012, SoPh, 275, 41
+\bibitem{ref6} Bourdin, P. A. 2017, ApJL, 850, L29
+\bibitem{ref7} Caspi, A., Seaton, D., Casini, R., et al. 2023a, BAAS, 55, 049
+\bibitem{ref8} Caspi, A., Seaton, D., Casini, R., et al. 2023b, BAAS, 55, 048
+\bibitem{ref9} Chiu, Y. T., & Hilton, H. H. 1977, ApJ, 212, 873
+\bibitem{ref10} Domingo, V., Fleck, B., & Poland, A. I. 1995, SoPh, 162, 1
+\bibitem{ref11} Gopalswamy, N., Christe, S., Fung, S., et al. 2023, BAAS, 55, 138
+\bibitem{ref12} Harris, C. R., Millman, K. J., van der Walt, S. J., et al. 2020, Natur, 585, 357
+\bibitem{ref13} Hassler, D. M., Gibson, S. E., Newmark, J. S., et al. 2023, BAAS, 55, 164
+\bibitem{ref14} Kaiser, M. L., Kucera, T. A., Davila, J. M., et al. 2008, SSRv, 136, 5
+\bibitem{ref15} Lemen, J. R., Title, A. M., Akin, D. J., et al. 2012, SoPh, 275, 17
+\bibitem{ref16} Malanushenko, A., Schrijver, C. J., DeRosa, M. L., Wheatland, M. S., & Gilchrist, S. A. 2012, ApJ, 756, 153
+\bibitem{ref17} Martens, P. C. H. 2010, ApJ, 714, 1290
+\bibitem{ref18} Pesnell, W. D., Thompson, B. J., & Chamberlin, P. C. 2012, SoPh, 275, 3
+\bibitem{ref19} Plowman, J. 2021, ApJ, 922, 109
+\bibitem{ref20} Plowman, J. 2023, ApJ, 947, 5
+\bibitem{ref21} Plowman, J. 2024, CROBAR Initial Release, v0.1.0, Zenodo, doi:10.5281/zenodo.10995112
+\bibitem{ref22} Plowman, J., & Caspi, A. 2020, ApJ, 905, 17
+\bibitem{ref23} Raouafi, N. E., Hoeksema, J. T., Newmark, J. S., et al. 2023, BAAS, 55, 333
+\bibitem{ref24} Régnier, S., & Priest, E. R. 2007, ApJL, 669, L53
+\bibitem{ref25} Rosner, R., Tucker, W. H., & Vaiana, G. S. 1978, ApJ, 220, 643
+\bibitem{ref26} Scherrer, P. H., Bogart, R. S., Bush, R. I., et al. 1995, SoPh, 162, 129
+\bibitem{ref27} Seaton, D., Caspi, A., Casini, R., et al. 2023, BAAS, 55, 361
+\bibitem{ref28} The SunPy Community, Barnes, W. T., Bobra, M. G., et al. 2020, ApJ, 890, 68
+\bibitem{ref29} Virtanen, P., Gommers, R., Oliphant, T. E., et al. 2020, NatMe, 17, 261
+\bibitem{ref30} Wheatland, M. S. 1999, ApJ, 518, 948
+\bibitem{ref31} Wiegelmann, T., & Sakurai, T. 2021, LRSP, 18, 1
+\end{thebibliography}
+\end{document}
